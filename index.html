@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Flick | نبرد رنگ‌ها</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+      }
+      body {
+        background: radial-gradient(circle at center, #1e1b4b 0%, #030712 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+        color: #fff;
+        font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, Roboto, sans-serif;
+      }
+      #game-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15);
+        border: 2px solid rgba(56, 189, 248, 0.3);
+      }
+      canvas {
+        display: block;
+      }
+      .instructions-bar {
+        margin-top: 14px;
+        font-size: 14px;
+        color: #94a3b8;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+      .key-hint {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container"></div>
+    <div class="instructions-bar">
+      <span>🖱️ دایره‌ها را با موس بگیرید و به مقصد برسانید</span>
+      <span class="key-hint">❤️ ۵ جون</span>
+      <span class="key-hint">🏆 بازی رکوردی</span>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
