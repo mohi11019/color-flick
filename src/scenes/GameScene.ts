@@ -5,6 +5,11 @@ import { SoundManager } from '../sound/SoundManager';
 import { TutorialDialog } from './TutorialDialog';
 import { TARGET_COLORS, NON_MATCHING_COLORS, TargetSide } from '../types';
 
+interface StardustParticle {
+  arc: Phaser.GameObjects.Arc;
+  speed: number;
+}
+
 export class GameScene extends Phaser.Scene {
   private soundManager!: SoundManager;
 
@@ -18,14 +23,23 @@ export class GameScene extends Phaser.Scene {
   private highScore: number = 0;
   private survivalTimer: number = 0;
 
+  // Combo system
+  private comboCount: number = 0;
+  private comboTimer: number = 0;
+  private readonly comboWindow: number = 3200; // ms
+
   // Objects
   private targetCircles: Map<TargetSide, TargetCircle> = new Map();
   private smallCircles: SmallCircle[] = [];
   private draggedCircle: SmallCircle | null = null;
 
-  // Exit Zones graphics
-  private exitZonesGraphics!: Phaser.GameObjects.Graphics;
+  // Visual Atmosphere & Spawner
+  private stardustParticles: StardustParticle[] = [];
   private exitBaysContainer!: Phaser.GameObjects.Container;
+  private centerPortalContainer!: Phaser.GameObjects.Container;
+  private centerOuterRing!: Phaser.GameObjects.Graphics;
+  private centerInnerRing!: Phaser.GameObjects.Graphics;
+  private centerCore!: Phaser.GameObjects.Arc;
 
   // Spawning & Difficulty scaling
   private spawnTimer: number = 0;
@@ -36,17 +50,16 @@ export class GameScene extends Phaser.Scene {
   // Challenge mechanic (moving target circles)
   private isChallengeActive: boolean = false;
   private challengeTimer: number = 0;
-  private nextChallengeAt: number = 22000; // first challenge after 22s
-  private challengeDuration: number = 12000; // lasts 12s
+  private nextChallengeAt: number = 22000;
+  private challengeDuration: number = 12000;
 
   // UI elements
   private hudContainer!: Phaser.GameObjects.Container;
   private scoreText!: Phaser.GameObjects.Text;
   private highScoreText!: Phaser.GameObjects.Text;
   private heartsText!: Phaser.GameObjects.Text;
+  private soundBtnText!: Phaser.GameObjects.Text;
   private challengeBanner!: Phaser.GameObjects.Container;
-  private centerPortalGraphics!: Phaser.GameObjects.Graphics;
-  private centerPortalRing!: Phaser.GameObjects.Arc;
 
   // Screens
   private tutorialDialog!: TutorialDialog;
@@ -65,7 +78,7 @@ export class GameScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    // Background decoration
+    // Background decoration & floating stardust
     this.createBackground(width, height);
 
     // Visual Exit Zones along borders and in corners
@@ -98,30 +111,41 @@ export class GameScene extends Phaser.Scene {
 
   private createBackground(width: number, height: number) {
     const bg = this.add.graphics();
+    // Deep sci-fi radial gradient
     bg.fillGradientStyle(0x0f172a, 0x0f172a, 0x020617, 0x020617, 1);
     bg.fillRect(0, 0, width, height);
 
-    // Subtle grid lines for high-tech arcade feel
+    // Subtle ambient cyber grid
     const grid = this.add.graphics();
-    grid.lineStyle(1, 0x334155, 0.2);
-    for (let x = 0; x <= width; x += 50) {
+    grid.lineStyle(1, 0x1e293b, 0.45);
+    for (let x = 0; x <= width; x += 55) {
       grid.lineBetween(x, 0, x, height);
     }
-    for (let y = 0; y <= height; y += 50) {
+    for (let y = 0; y <= height; y += 55) {
       grid.lineBetween(0, y, width, y);
+    }
+
+    // Drifting ambient stardust particles (Parallax depth)
+    for (let i = 0; i < 40; i++) {
+      const px = Phaser.Math.Between(0, width);
+      const py = Phaser.Math.Between(0, height);
+      const pr = Phaser.Math.FloatBetween(1.2, 2.8);
+      const alpha = Phaser.Math.FloatBetween(0.18, 0.65);
+      const star = this.add.circle(px, py, pr, 0x38bdf8, alpha);
+      star.setDepth(5);
+
+      this.stardustParticles.push({
+        arc: star,
+        speed: Phaser.Math.FloatBetween(8, 22)
+      });
     }
   }
 
-  // Visual Exit Zones (دریچه‌های خروج در گوشه‌ها و لبه‌های آزاد)
+  // Visual Exit Zones (دریچه‌های خروج نئونی در گوشه‌ها و لبه‌های آزاد)
   private createExitZones(width: number, height: number) {
-    this.exitBaysContainer = this.add.container(0, 0);
+    this.exitBaysContainer = this.add.container(0, 0).setDepth(20);
 
-    // Glowing border lines showing active disposal perimeters
-    this.exitZonesGraphics = this.add.graphics();
-    this.exitZonesGraphics.lineStyle(2, 0x06b6d4, 0.45);
-
-    // Corner bays
-    const cornerSize = 75;
+    const cornerSize = 82;
     const corners = [
       { x: 0, y: 0, label: '⇖ خروج', originX: 0, originY: 0, textX: 18, textY: 18 },
       { x: width, y: 0, label: 'خروج ⇗', originX: 1, originY: 0, textX: width - 18, textY: 18 },
@@ -130,9 +154,9 @@ export class GameScene extends Phaser.Scene {
     ];
 
     corners.forEach(c => {
-      // Shaded corner disposal wedge
       const wedge = this.add.graphics();
-      wedge.fillStyle(0x0891b2, 0.16);
+      // Shaded corner disposal bay
+      wedge.fillStyle(0x06b6d4, 0.16);
       wedge.beginPath();
       if (c.originX === 0 && c.originY === 0) {
         wedge.moveTo(0, 0);
@@ -155,8 +179,24 @@ export class GameScene extends Phaser.Scene {
       wedge.fillPath();
 
       // Glowing diagonal border
-      wedge.lineStyle(2, 0x22d3ee, 0.65);
+      wedge.lineStyle(2.5, 0x22d3ee, 0.75);
       wedge.strokePath();
+
+      // Inner chevron bracket
+      wedge.lineStyle(1.5, 0x38bdf8, 0.4);
+      if (c.originX === 0 && c.originY === 0) {
+        wedge.lineBetween(14, 14, 38, 14);
+        wedge.lineBetween(14, 14, 14, 38);
+      } else if (c.originX === 1 && c.originY === 0) {
+        wedge.lineBetween(width - 14, 14, width - 38, 14);
+        wedge.lineBetween(width - 14, 14, width - 14, 38);
+      } else if (c.originX === 0 && c.originY === 1) {
+        wedge.lineBetween(14, height - 14, 38, height - 14);
+        wedge.lineBetween(14, height - 14, 14, height - 38);
+      } else {
+        wedge.lineBetween(width - 14, height - 14, width - 38, height - 14);
+        wedge.lineBetween(width - 14, height - 14, width - 14, height - 38);
+      }
 
       // Corner label
       const label = this.add.text(c.textX, c.textY, c.label, {
@@ -169,57 +209,91 @@ export class GameScene extends Phaser.Scene {
       this.exitBaysContainer.add([wedge, label]);
     });
 
-    // Dashed border markers along edges
+    // Dashed border intake markers along edges
     const edgeMarkers = [
-      // Top edge segments
-      { x1: 90, y1: 4, x2: 340, y2: 4 },
-      { x1: 560, y1: 4, x2: 810, y2: 4 },
-      // Bottom edge segments
-      { x1: 90, y1: height - 4, x2: 340, y2: height - 4 },
-      { x1: 560, y1: height - 4, x2: 810, y2: height - 4 },
-      // Left edge segments
-      { x1: 4, y1: 90, x2: 4, y2: 240 },
-      { x1: 4, y1: 460, x2: 4, y2: 610 },
-      // Right edge segments
-      { x1: width - 4, y1: 90, x2: width - 4, y2: 240 },
-      { x1: width - 4, y1: 460, x2: width - 4, y2: 610 }
+      { x1: 95, y1: 4, x2: 330, y2: 4 },
+      { x1: 570, y1: 4, x2: 805, y2: 4 },
+      { x1: 95, y1: height - 4, x2: 330, y2: height - 4 },
+      { x1: 570, y1: height - 4, x2: 805, y2: height - 4 },
+      { x1: 4, y1: 95, x2: 4, y2: 235 },
+      { x1: 4, y1: 465, x2: 4, y2: 605 },
+      { x1: width - 4, y1: 95, x2: width - 4, y2: 235 },
+      { x1: width - 4, y1: 465, x2: width - 4, y2: 605 }
     ];
 
     const markersGfx = this.add.graphics();
     markersGfx.lineStyle(3, 0x06b6d4, 0.45);
-    edgeMarkers.forEach(m => {
-      markersGfx.lineBetween(m.x1, m.y1, m.x2, m.y2);
-    });
+    edgeMarkers.forEach(m => markersGfx.lineBetween(m.x1, m.y1, m.x2, m.y2));
     this.exitBaysContainer.add(markersGfx);
 
-    // Subtle pulsing animation on the exit bays
+    // Subtle energetic pulse on exit bays
     this.tweens.add({
       targets: this.exitBaysContainer,
-      alpha: 0.75,
-      duration: 1500,
+      alpha: 0.8,
+      duration: 1600,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
   }
 
+  // Futuristic Center Spawner Portal with multi-layered rotation
   private createCenterPortal(cx: number, cy: number) {
-    this.centerPortalGraphics = this.add.graphics();
-    this.centerPortalGraphics.lineStyle(2, 0x38bdf8, 0.35);
-    this.centerPortalGraphics.strokeCircle(cx, cy, 38);
-    this.centerPortalGraphics.lineStyle(1, 0x38bdf8, 0.15);
-    this.centerPortalGraphics.strokeCircle(cx, cy, 55);
+    this.centerPortalContainer = this.add.container(cx, cy).setDepth(25);
 
-    // Pulsing inner ring
-    this.centerPortalRing = this.add.circle(cx, cy, 24, 0x38bdf8, 0.15);
+    // Outer rotating techno rune ring
+    this.centerOuterRing = this.add.graphics();
+    this.centerOuterRing.lineStyle(2, 0x38bdf8, 0.45);
+    this.centerOuterRing.strokeCircle(0, 0, 42);
+
+    // Techno tick marks around spawner
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI * 2) / 8;
+      this.centerOuterRing.lineBetween(
+        Math.cos(a) * 38,
+        Math.sin(a) * 38,
+        Math.cos(a) * 46,
+        Math.sin(a) * 46
+      );
+    }
+    this.centerPortalContainer.add(this.centerOuterRing);
+
+    // Inner counter-rotating ring
+    this.centerInnerRing = this.add.graphics();
+    this.centerInnerRing.lineStyle(1.5, 0x06b6d4, 0.35);
+    this.centerInnerRing.strokeCircle(0, 0, 26);
+    this.centerPortalContainer.add(this.centerInnerRing);
+
+    // Central pulsing core
+    this.centerCore = this.add.circle(0, 0, 14, 0x38bdf8, 0.65);
+    this.centerPortalContainer.add(this.centerCore);
+
+    // Rotating tweens
     this.tweens.add({
-      targets: this.centerPortalRing,
-      scaleX: 1.4,
-      scaleY: 1.4,
-      alpha: 0,
-      duration: 1500,
+      targets: this.centerOuterRing,
+      angle: 360,
+      duration: 14000,
       repeat: -1,
-      ease: 'Cubic.easeOut'
+      ease: 'Linear'
+    });
+
+    this.tweens.add({
+      targets: this.centerInnerRing,
+      angle: -360,
+      duration: 8000,
+      repeat: -1,
+      ease: 'Linear'
+    });
+
+    this.tweens.add({
+      targets: this.centerCore,
+      scaleX: 1.3,
+      scaleY: 1.3,
+      alpha: 0.35,
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
     });
   }
 
@@ -253,9 +327,9 @@ export class GameScene extends Phaser.Scene {
     this.hudContainer.add(this.heartsText);
     this.updateHeartsDisplay();
 
-    // Help Button (top left next to hearts)
-    const helpBtn = this.add.container(215, 32);
-    const helpBg = this.add.rectangle(0, 0, 85, 28, 0x1e293b, 0.9);
+    // Help Button
+    const helpBtn = this.add.container(205, 32);
+    const helpBg = this.add.rectangle(0, 0, 80, 28, 0x1e293b, 0.9);
     helpBg.setStrokeStyle(1, 0x475569);
     helpBg.setInteractive({ useHandCursor: true });
     const helpText = this.add.text(0, 0, '📖 راهنما', {
@@ -272,6 +346,27 @@ export class GameScene extends Phaser.Scene {
     });
     helpBtn.add([helpBg, helpText]);
     this.hudContainer.add(helpBtn);
+
+    // Sound Toggle Button (Mute/Unmute)
+    const soundBtn = this.add.container(295, 32);
+    const soundBg = this.add.rectangle(0, 0, 75, 28, 0x1e293b, 0.9);
+    soundBg.setStrokeStyle(1, 0x475569);
+    soundBg.setInteractive({ useHandCursor: true });
+    this.soundBtnText = this.add.text(0, 0, '🔊 صدا', {
+      fontSize: '12px',
+      color: '#cbd5e1',
+      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+    }).setOrigin(0.5);
+
+    soundBg.on('pointerover', () => soundBg.setFillStyle(0x334155));
+    soundBg.on('pointerout', () => soundBg.setFillStyle(0x1e293b));
+    soundBg.on('pointerdown', () => {
+      const isMuted = this.soundManager.toggleMute();
+      this.soundBtnText.setText(isMuted ? '🔇 بی‌صدا' : '🔊 صدا');
+      this.soundBtnText.setColor(isMuted ? '#f87171' : '#cbd5e1');
+    });
+    soundBtn.add([soundBg, this.soundBtnText]);
+    this.hudContainer.add(soundBtn);
 
     // Score on top right
     this.scoreText = this.add.text(width - 25, 20, 'امتیاز: ۰', {
@@ -290,7 +385,7 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(1, 0);
     this.hudContainer.add(this.highScoreText);
 
-    // Challenge Banner (center top, hidden by default)
+    // Challenge Banner
     this.challengeBanner = this.add.container(width / 2, 120).setAlpha(0);
     const bannerBg = this.add.rectangle(0, 0, 380, 42, 0xff0055, 0.88);
     bannerBg.setStrokeStyle(2, 0xffffff, 0.95);
@@ -323,6 +418,7 @@ export class GameScene extends Phaser.Scene {
         if (dist <= circle.radius * 1.6) {
           this.draggedCircle = circle;
           circle.startDrag(pointer);
+          this.soundManager.playGrab();
           break;
         }
       }
@@ -336,7 +432,6 @@ export class GameScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => {
       if (this.draggedCircle) {
-        // Stops immediately where let go (no continuing flick or momentum)
         this.draggedCircle.endDrag();
         this.draggedCircle = null;
       }
@@ -347,7 +442,6 @@ export class GameScene extends Phaser.Scene {
     this.gameOverContainer = this.add.container(0, 0).setDepth(200).setVisible(false);
 
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.88);
-
     const card = this.add.rectangle(width / 2, height / 2, 520, 390, 0x1e1b4b, 0.96);
     card.setStrokeStyle(3, 0xff0055, 0.85);
 
@@ -384,7 +478,7 @@ export class GameScene extends Phaser.Scene {
     restartBtn.on('pointerover', () => restartBtn.setFillStyle(0x059669));
     restartBtn.on('pointerout', () => restartBtn.setFillStyle(0x10b981));
     restartBtn.on('pointerdown', () => {
-      this.soundManager.playMatch();
+      this.soundManager.playMatch(1);
       this.restartGame();
     });
 
@@ -423,6 +517,8 @@ export class GameScene extends Phaser.Scene {
     this.isPausedForTutorial = false;
     this.lives = this.maxLives;
     this.score = 0;
+    this.comboCount = 0;
+    this.comboTimer = 0;
     this.survivalTimer = 0;
     this.gameTimeElapsed = 0;
     this.spawnTimer = 0;
@@ -437,12 +533,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private restartGame() {
-    // Clear remaining circles
     this.smallCircles.forEach(c => c.destroy());
     this.smallCircles = [];
     this.draggedCircle = null;
 
-    // Reset target circles to base positions and sizes
     this.targetCircles.forEach(target => {
       target.currentRadius = target.baseRadius;
       target.redraw();
@@ -465,15 +559,15 @@ export class GameScene extends Phaser.Scene {
     const cx = width / 2;
     const cy = height / 2;
 
-    // Pulse the center portal
+    // Portal energy flash
     this.tweens.add({
-      targets: this.centerPortalRing,
+      targets: this.centerCore,
       scaleX: 2.2,
       scaleY: 2.2,
-      alpha: 0.8,
-      duration: 180,
+      alpha: 1,
+      duration: 160,
       yoyo: true,
-      ease: 'Power1'
+      ease: 'Power2'
     });
 
     // 65% chance matching one of 4 targets, 35% chance non-matching
@@ -499,6 +593,9 @@ export class GameScene extends Phaser.Scene {
     const circle = new SmallCircle(this, cx, cy, config);
     this.smallCircles.push(circle);
     this.soundManager.playSpawn();
+
+    // Spurt of mini birth particles
+    this.createColorBurst(cx, cy, config.color, 8);
   }
 
   update(_time: number, delta: number) {
@@ -512,6 +609,23 @@ export class GameScene extends Phaser.Scene {
       this.survivalTimer -= 1000;
       this.addScore(10);
     }
+
+    // Combo countdown timer
+    if (this.comboTimer > 0) {
+      this.comboTimer -= delta;
+      if (this.comboTimer <= 0) {
+        this.comboCount = 0;
+      }
+    }
+
+    // Update drifting background stardust
+    const { width, height } = this.scale;
+    this.stardustParticles.forEach(p => {
+      p.arc.x += (p.speed * delta) / 1000;
+      p.arc.y += (p.speed * 0.4 * delta) / 1000;
+      if (p.arc.x > width + 10) p.arc.x = -10;
+      if (p.arc.y > height + 10) p.arc.y = -10;
+    });
 
     // Difficulty scaling: spawn circles faster over time
     this.currentSpawnDelay = Math.max(
@@ -529,8 +643,8 @@ export class GameScene extends Phaser.Scene {
     // Challenge logic
     this.handleChallenge(delta);
 
-    // Update and check small circles (collisions, exit zones, & border exit)
-    this.processSmallCircles();
+    // Update and check small circles (trail, collisions, exit zones, & border exit)
+    this.processSmallCircles(delta);
   }
 
   private handleChallenge(delta: number) {
@@ -546,13 +660,11 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  // Smooth, gradual challenge initiation with anticipation warning
   private triggerChallenge() {
     this.isChallengeActive = true;
     this.challengeTimer = 0;
     this.soundManager.playAlert();
 
-    // Show challenge banner
     this.tweens.add({
       targets: this.challengeBanner,
       alpha: 1,
@@ -561,12 +673,12 @@ export class GameScene extends Phaser.Scene {
       ease: 'Back.easeOut'
     });
 
-    // Phase 1: 1.0 second anticipation vibration/pulse so player is ready
+    // Phase 1: 1.0 second anticipation vibration/pulse
     this.targetCircles.forEach(target => {
       target.prepareMoving();
     });
 
-    // Phase 2: After 1.0s, begin the gentle, slow glide from current position
+    // Phase 2: After 1.0s, begin the gentle, slow glide
     this.time.delayedCall(1000, () => {
       if (this.isChallengeActive && !this.isGameOver) {
         this.targetCircles.forEach(target => {
@@ -580,7 +692,6 @@ export class GameScene extends Phaser.Scene {
     this.isChallengeActive = false;
     this.nextChallengeAt = this.gameTimeElapsed + 22000 + Math.random() * 6000;
 
-    // Hide challenge banner
     this.tweens.add({
       targets: this.challengeBanner,
       alpha: 0,
@@ -589,33 +700,29 @@ export class GameScene extends Phaser.Scene {
       ease: 'Cubic.easeIn'
     });
 
-    // Return targets to base positions smoothly
     this.targetCircles.forEach(target => {
       target.stopMoving();
     });
   }
 
-  // Checks if a given coordinate is inside an active Exit Zone (around screen borders where targets are not located)
   private isInsideExitZone(x: number, y: number): boolean {
     const { width, height } = this.scale;
-    const margin = 42; // margin from the canvas boundary
+    const margin = 42;
 
-    // Check if close to canvas border
     const isNearBorder = x <= margin || x >= width - margin || y <= margin || y >= height - margin;
     if (!isNearBorder) return false;
 
-    // Make sure it is NOT colliding with any of the 4 target circles
     for (const target of this.targetCircles.values()) {
       const dist = Phaser.Math.Distance.Between(x, y, target.x, target.y);
       if (dist <= target.getRadius() + 20) {
-        return false; // Under the influence of a target circle, not an exit zone
+        return false;
       }
     }
 
     return true;
   }
 
-  private processSmallCircles() {
+  private processSmallCircles(delta: number) {
     const { width, height } = this.scale;
     const boundaryBuffer = 15;
 
@@ -626,7 +733,10 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
 
-      // 1. Check collision with any target circle (works both while drifting AND while dragging directly onto target!)
+      // Update particle stardust trail
+      circle.updateTrail(delta);
+
+      // 1. Check collision with any target circle
       let collidedWithTarget = false;
       this.targetCircles.forEach((target, side) => {
         if (collidedWithTarget || circle.isDead) return;
@@ -648,7 +758,7 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
 
-      // 2. Check collision with Exit Zones (دریچه‌های خروج اطراف صفحه)
+      // 2. Check collision with Exit Zones
       if (this.isInsideExitZone(circle.x, circle.y)) {
         this.handleExitZone(circle);
         this.smallCircles.splice(i, 1);
@@ -672,20 +782,34 @@ export class GameScene extends Phaser.Scene {
   private handleTargetCollision(circle: SmallCircle, target: TargetCircle, targetSide: TargetSide) {
     if (circle.config.isMatchingTarget && circle.config.targetSide === targetSide) {
       // MATCH SUCCESS!
-      this.soundManager.playMatch();
+      this.comboCount++;
+      this.comboTimer = this.comboWindow;
+
+      const points = 100 * this.comboCount;
+      this.addScore(points);
+      this.soundManager.playMatch(this.comboCount);
       target.grow();
-      this.addScore(100);
-      this.showFloatingText(target.x, target.y, '+100 ✨', '#2ecc71');
-      this.createColorBurst(circle.x, circle.y, circle.config.color, 16);
+
+      // Juicy combo floating text feedback
+      if (this.comboCount >= 2) {
+        const titles = ['', '', '🔥 کومبو ۲x!', '⚡ کومبو ۳x!', '🌟 سوپر کومبو ۴x!', '👑 الترا کومبو ۵x!'];
+        const badge = titles[Math.min(this.comboCount, titles.length - 1)] || `🔥 کومبو ${this.comboCount}x!`;
+        this.showFloatingText(target.x, target.y - 30, `${badge} (+${points})`, '#f59e0b', 22);
+      } else {
+        this.showFloatingText(target.x, target.y, `+${points} ✨`, '#2ecc71', 18);
+      }
+
+      this.createColorBurst(circle.x, circle.y, circle.config.color, 22);
       circle.destroy();
     } else {
-      // MISMATCH FAILURE: Highlight the exact impact point clearly (without blinding full-screen red flash)
+      // MISMATCH: reset combo
+      this.comboCount = 0;
+      this.comboTimer = 0;
       this.showMistakeAt(circle.x, circle.y, target, 'برخورد اشتباه با دروازه!');
       circle.destroy();
     }
   }
 
-  // Handles a circle touching an Exit Zone or leaving the screen
   private handleExitZone(circle: SmallCircle) {
     if (circle.isDead) return;
     circle.isDead = true;
@@ -694,11 +818,11 @@ export class GameScene extends Phaser.Scene {
       this.draggedCircle = null;
     }
 
-    // Suction visual effect: shrinks and fades into exit zone
+    // Elongated suction vortex effect
     this.tweens.add({
       targets: circle,
-      scaleX: 0,
-      scaleY: 0,
+      scaleX: 0.2,
+      scaleY: 1.6,
       alpha: 0.1,
       duration: 180,
       ease: 'Cubic.easeIn',
@@ -715,25 +839,23 @@ export class GameScene extends Phaser.Scene {
         '+50 🚀 خروج موفق',
         '#38bdf8'
       );
-      this.createColorBurst(circle.x, circle.y, 0x06b6d4, 12);
+      this.createColorBurst(circle.x, circle.y, 0x06b6d4, 14);
     } else {
       // MATCHING CIRCLE ESCAPED INTO EXIT ZONE -> PENALTY!
+      this.comboCount = 0;
+      this.comboTimer = 0;
       this.showMistakeAt(circle.x, circle.y, undefined, 'دایره همرنگ وارد خروجی شد!');
     }
   }
 
-  // Clear, localized mistake indicator right at the collision coordinate (without turning whole screen red)
   private showMistakeAt(x: number, y: number, target?: TargetCircle, reason: string = 'خطا!') {
     this.soundManager.playHurt();
-    // Soft, crisp micro-shake instead of heavy wobbly shaking
     this.cameras.main.shake(130, 0.007);
 
-    // 1. Highlight & shake the specific target circle if it was hit
     if (target) {
       target.flashError();
     }
 
-    // 2. Sharp expanding shockwave ring right at the impact point
     const ring = this.add.circle(x, y, 16);
     ring.setStrokeStyle(3, 0xff0055, 1);
     ring.setFillStyle(0xff0055, 0.25);
@@ -748,7 +870,6 @@ export class GameScene extends Phaser.Scene {
       onComplete: () => ring.destroy()
     });
 
-    // 3. Bold animated ✖ mark right on the exact spot
     const cross = this.add.text(x, y, '✖', {
       fontSize: '28px',
       color: '#ff0055',
@@ -775,15 +896,12 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // 4. Warning debris spark particles at impact point
     this.createColorBurst(x, y, 0xff0055, 18);
 
-    // 5. Floating text right next to the mistake point
     const clampedX = Phaser.Math.Clamp(x, 110, this.scale.width - 110);
     const clampedY = Phaser.Math.Clamp(y - 36, 50, this.scale.height - 50);
     this.showFloatingText(clampedX, clampedY, `❌ ${reason} (-۱ ❤️)`, '#ff4757', 16);
 
-    // 6. Reduce life & pulse heart icons
     this.loseLife();
   }
 
@@ -801,7 +919,6 @@ export class GameScene extends Phaser.Scene {
     this.lives = Math.max(0, this.lives - 1);
     this.updateHeartsDisplay();
 
-    // Pulse the heart icons in HUD
     this.tweens.add({
       targets: this.heartsText,
       scaleX: 1.25,
@@ -821,11 +938,9 @@ export class GameScene extends Phaser.Scene {
     this.isGameRunning = false;
     this.soundManager.playGameOver();
 
-    // Stop all targets
     this.targetCircles.forEach(t => t.stopMoving());
     this.challengeBanner.setAlpha(0);
 
-    // Set Game Over screen texts
     const finalScoreText = this.gameOverContainer.getByName('finalScore') as Phaser.GameObjects.Text;
     const highScoreMsg = this.gameOverContainer.getByName('highScoreMsg') as Phaser.GameObjects.Text;
 
@@ -860,21 +975,21 @@ export class GameScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: floating,
-      y: y - 45,
+      y: y - 50,
       alpha: 0,
-      scaleX: 1.2,
-      scaleY: 1.2,
-      duration: 850,
+      scaleX: 1.25,
+      scaleY: 1.25,
+      duration: 900,
       ease: 'Cubic.easeOut',
       onComplete: () => floating.destroy()
     });
   }
 
-  private createColorBurst(x: number, y: number, color: number, count: number = 14) {
+  private createColorBurst(x: number, y: number, color: number, count: number = 16) {
     for (let i = 0; i < count; i++) {
-      const p = this.add.circle(x, y, Phaser.Math.Between(3, 6), color);
+      const p = this.add.circle(x, y, Phaser.Math.Between(2.5, 5.5), color);
       const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const speed = Phaser.Math.FloatBetween(60, 220);
+      const speed = Phaser.Math.FloatBetween(60, 240);
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
 
@@ -884,7 +999,7 @@ export class GameScene extends Phaser.Scene {
         y: y + vy * 0.45,
         alpha: 0,
         scale: 0.1,
-        duration: Phaser.Math.Between(350, 550),
+        duration: Phaser.Math.Between(360, 600),
         ease: 'Cubic.easeOut',
         onComplete: () => p.destroy()
       });
