@@ -368,6 +368,26 @@ export class GameScene extends Phaser.Scene {
     soundBtn.add([soundBg, this.soundBtnText]);
     this.hudContainer.add(soundBtn);
 
+    // Return to Main Menu Button
+    const menuBtn = this.add.container(380, 32);
+    const menuBg = this.add.rectangle(0, 0, 75, 28, 0x1e293b, 0.9);
+    menuBg.setStrokeStyle(1, 0x475569);
+    menuBg.setInteractive({ useHandCursor: true });
+    const menuText = this.add.text(0, 0, '🏠 منو', {
+      fontSize: '12px',
+      color: '#cbd5e1',
+      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+    }).setOrigin(0.5);
+
+    menuBg.on('pointerover', () => menuBg.setFillStyle(0x334155));
+    menuBg.on('pointerout', () => menuBg.setFillStyle(0x1e293b));
+    menuBg.on('pointerdown', () => {
+      this.soundManager.playGrab();
+      this.scene.start('MenuScene');
+    });
+    menuBtn.add([menuBg, menuText]);
+    this.hudContainer.add(menuBtn);
+
     // Score on top right
     this.scoreText = this.add.text(width - 25, 20, 'امتیاز: ۰', {
       fontSize: '22px',
@@ -465,11 +485,11 @@ export class GameScene extends Phaser.Scene {
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
     }).setOrigin(0.5).setName('highScoreMsg');
 
-    // Restart button
-    const restartBtn = this.add.rectangle(width / 2 - 95, height / 2 + 80, 175, 48, 0x10b981, 1);
+    // 1. Restart button
+    const restartBtn = this.add.rectangle(width / 2 - 145, height / 2 + 85, 135, 46, 0x10b981, 1);
     restartBtn.setInteractive({ useHandCursor: true });
-    const restartText = this.add.text(width / 2 - 95, height / 2 + 80, 'شروع مجدد 🔁', {
-      fontSize: '18px',
+    const restartText = this.add.text(width / 2 - 145, height / 2 + 85, 'تکرار 🔁', {
+      fontSize: '16px',
       color: '#ffffff',
       fontStyle: 'bold',
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
@@ -482,18 +502,35 @@ export class GameScene extends Phaser.Scene {
       this.restartGame();
     });
 
-    // Tutorial button on GameOver screen
-    const guideBtn = this.add.rectangle(width / 2 + 105, height / 2 + 80, 165, 48, 0x3b82f6, 1);
-    guideBtn.setInteractive({ useHandCursor: true });
-    const guideText = this.add.text(width / 2 + 105, height / 2 + 80, '📖 راهنمای بازی', {
-      fontSize: '17px',
+    // 2. Main Menu button
+    const menuBtn = this.add.rectangle(width / 2, height / 2 + 85, 135, 46, 0x0284c7, 1);
+    menuBtn.setInteractive({ useHandCursor: true });
+    const menuText = this.add.text(width / 2, height / 2 + 85, 'منو 🏠', {
+      fontSize: '16px',
       color: '#ffffff',
       fontStyle: 'bold',
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
     }).setOrigin(0.5);
 
-    guideBtn.on('pointerover', () => guideBtn.setFillStyle(0x2563eb));
-    guideBtn.on('pointerout', () => guideBtn.setFillStyle(0x3b82f6));
+    menuBtn.on('pointerover', () => menuBtn.setFillStyle(0x0369a1));
+    menuBtn.on('pointerout', () => menuBtn.setFillStyle(0x0284c7));
+    menuBtn.on('pointerdown', () => {
+      this.soundManager.playGrab();
+      this.scene.start('MenuScene');
+    });
+
+    // 3. Tutorial / Guide button
+    const guideBtn = this.add.rectangle(width / 2 + 145, height / 2 + 85, 135, 46, 0x334155, 1);
+    guideBtn.setInteractive({ useHandCursor: true });
+    const guideText = this.add.text(width / 2 + 145, height / 2 + 85, 'راهنما 📖', {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+    }).setOrigin(0.5);
+
+    guideBtn.on('pointerover', () => guideBtn.setFillStyle(0x475569));
+    guideBtn.on('pointerout', () => guideBtn.setFillStyle(0x334155));
     guideBtn.on('pointerdown', () => {
       this.tutorialDialog.setVisible(true);
     });
@@ -506,6 +543,8 @@ export class GameScene extends Phaser.Scene {
       highScoreMsg,
       restartBtn,
       restartText,
+      menuBtn,
+      menuText,
       guideBtn,
       guideText
     ]);
