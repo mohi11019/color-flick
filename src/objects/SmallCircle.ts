@@ -5,6 +5,7 @@ export interface SmallCircleConfig {
   color: number;
   isMatchingTarget: boolean;
   targetSide?: TargetSide;
+  textureKey?: string;
 }
 
 export class SmallCircle extends Phaser.GameObjects.Container {
@@ -13,8 +14,10 @@ export class SmallCircle extends Phaser.GameObjects.Container {
   public isDragging: boolean = false;
   public isDead: boolean = false;
 
+  private sprite?: Phaser.GameObjects.Image;
   private graphics: Phaser.GameObjects.Graphics;
   private glowGraphics: Phaser.GameObjects.Graphics;
+  private idleTween?: Phaser.Tweens.Tween;
   private dragOffset: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
 
   // Gentle outward drift from center
@@ -47,14 +50,55 @@ export class SmallCircle extends Phaser.GameObjects.Container {
       Math.sin(this.driftAngle) * this.driftSpeed
     );
 
+    // Resolve texture key if not explicitly given
+    let textureKey = this.config.textureKey;
+    if (!textureKey) {
+      if (this.config.targetSide === 'top') textureKey = 'orb_blue';
+      else if (this.config.targetSide === 'bottom') textureKey = 'orb_red';
+      else if (this.config.targetSide === 'left') textureKey = 'orb_green';
+      else if (this.config.targetSide === 'right') textureKey = 'orb_yellow';
+      else {
+        switch (this.config.color) {
+          case 0xa55eea: textureKey = 'orb_purple'; break;
+          case 0xff78c4: textureKey = 'orb_pink'; break;
+          case 0x00d2d3: textureKey = 'orb_cyan'; break;
+          case 0xffffff: textureKey = 'orb_white'; break;
+          case 0xbdc3c7: textureKey = 'orb_silver'; break;
+          default: textureKey = 'orb_purple'; break;
+        }
+      }
+    }
+    this.config.textureKey = textureKey;
+
     // Layer 1: Outer glowing aura
     this.glowGraphics = scene.add.graphics();
     this.add(this.glowGraphics);
 
-    // Layer 2: Main orb body with glass reflections
+    // Layer 2: Main orb body (Sprite if texture exists, else procedural fallback)
     this.graphics = scene.add.graphics();
     this.add(this.graphics);
-    this.drawCircle();
+
+    if (textureKey && scene.textures.exists(textureKey)) {
+      this.sprite = scene.add.image(0, 0, textureKey);
+      this.sprite.setDisplaySize(this.radius * 2.5, this.radius * 2.5);
+      this.add(this.sprite);
+
+      // Cute idle breathing squash animation
+      this.idleTween = scene.tweens.add({
+        targets: this.sprite,
+        scaleX: 1.07,
+        scaleY: 0.93,
+        y: 1.2,
+        duration: Phaser.Math.Between(650, 950),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+
+      this.drawAura();
+    } else {
+      this.drawCircle();
+    }
 
     scene.add.existing(this);
 
@@ -71,6 +115,18 @@ export class SmallCircle extends Phaser.GameObjects.Container {
     // Make circle interactive
     this.setSize(this.radius * 2.6, this.radius * 2.6);
     this.setInteractive({ useHandCursor: true });
+  }
+
+  private drawAura() {
+    this.glowGraphics.clear();
+    const r = this.radius;
+    const c = this.config.color;
+
+    // Soft outer neon glow aura
+    this.glowGraphics.fillStyle(c, 0.22);
+    this.glowGraphics.fillCircle(0, 0, r + 9);
+    this.glowGraphics.fillStyle(c, 0.35);
+    this.glowGraphics.fillCircle(0, 0, r + 4);
   }
 
   private drawCircle() {
@@ -121,6 +177,15 @@ export class SmallCircle extends Phaser.GameObjects.Container {
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setVelocity(0, 0);
+
+    // Pause idle breathing animation during drag
+    if (this.idleTween) {
+      this.idleTween.pause();
+    }
+    if (this.sprite) {
+      this.sprite.setScale(1.0);
+      this.sprite.setY(0);
+    }
 
     // Dynamic pickup squash & grow
     this.scene.tweens.add({
@@ -208,7 +273,12 @@ export class SmallCircle extends Phaser.GameObjects.Container {
       scaleY: 1.0,
       rotation: 0,
       duration: 150,
-      ease: 'Back.easeOut'
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        if (!this.isDead && this.idleTween) {
+          this.idleTween.resume();
+        }
+      }
     });
 
     const body = this.body as Phaser.Physics.Arcade.Body;
@@ -217,6 +287,9 @@ export class SmallCircle extends Phaser.GameObjects.Container {
 
   public destroy(fromScene?: boolean) {
     this.isDead = true;
+    if (this.idleTween) {
+      this.idleTween.stop();
+    }
     super.destroy(fromScene);
   }
 }

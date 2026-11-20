@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="pinkBody" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fce7f3" />
+      <stop offset="35%" stop-color="#f472b6" />
+      <stop offset="80%" stop-color="#db2777" />
+      <stop offset="100%" stop-color="#831843" />
+    </radialGradient>
+    <linearGradient id="specularPink" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="64" cy="64" r="54" fill="#f472b6" opacity="0.38" />
+
+  <!-- Main Body -->
+  <circle cx="64" cy="64" r="50" fill="url(#pinkBody)" stroke="#fbcfe8" stroke-width="3" />
+
+  <!-- Reflection -->
+  <ellipse cx="48" cy="36" rx="20" ry="11" transform="rotate(-30 48 36)" fill="url(#specularPink)" />
+  <circle cx="74" cy="28" r="4.5" fill="#ffffff" opacity="0.75" />
+
+  <!-- Sweet Big Eyes -->
+  <ellipse cx="46" cy="63" rx="8" ry="11" fill="#500724" />
+  <circle cx="43.5" cy="58.5" r="3.8" fill="#ffffff" />
+  <circle cx="47.5" cy="66" r="1.8" fill="#ffffff" />
+
+  <ellipse cx="78" cy="63" rx="8" ry="11" fill="#500724" />
+  <circle cx="75.5" cy="58.5" r="3.8" fill="#ffffff" />
+  <circle cx="79.5" cy="66" r="1.8" fill="#ffffff" />
+
+  <!-- Blush -->
+  <ellipse cx="34" cy="73" rx="6" ry="3.5" fill="#be185d" opacity="0.5" />
+  <ellipse cx="90" cy="73" rx="6" ry="3.5" fill="#be185d" opacity="0.5" />
+
+  <!-- Cute Heart Mouth -->
+  <path d="M 58 72 Q 62 76 66 72" fill="none" stroke="#500724" stroke-width="2.5" stroke-linecap="round" />
+</svg>

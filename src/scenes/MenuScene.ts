@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SoundManager } from '../sound/SoundManager';
+import { preloadGameAssets } from '../assets';
 
 interface StardustParticle {
   arc: Phaser.GameObjects.Arc;
@@ -25,6 +26,10 @@ export class MenuScene extends Phaser.Scene {
 
   constructor() {
     super('MenuScene');
+  }
+
+  preload() {
+    preloadGameAssets(this);
   }
 
   create() {

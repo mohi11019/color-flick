@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Body 3D Gradient -->
+    <radialGradient id="blueBody" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#93c5fd" />
+      <stop offset="35%" stop-color="#3b82f6" />
+      <stop offset="80%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#172554" />
+    </radialGradient>
+    <!-- Specular Highlight Gradient -->
+    <linearGradient id="specular" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+    <!-- Outer Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Outer Glow -->
+  <circle cx="64" cy="64" r="54" fill="#3b82f6" opacity="0.35" filter="url(#glow)" />
+
+  <!-- Main Slime Body -->
+  <circle cx="64" cy="64" r="50" fill="url(#blueBody)" stroke="#bfdbfe" stroke-width="3" />
+
+  <!-- Soft Rim Light (Bottom Right) -->
+  <path d="M 38 106 A 50 50 0 0 0 106 38 A 48 48 0 0 1 38 106 Z" fill="#60a5fa" opacity="0.3" />
+
+  <!-- Top Glossy Reflection Bubble -->
+  <ellipse cx="48" cy="36" rx="20" ry="11" transform="rotate(-30 48 36)" fill="url(#specular)" />
+  <circle cx="74" cy="28" r="4.5" fill="#ffffff" opacity="0.75" />
+
+  <!-- Cute Eyes -->
+  <!-- Left Eye -->
+  <ellipse cx="46" cy="64" rx="7.5" ry="11" fill="#0f172a" />
+  <circle cx="43.5" cy="59.5" r="3.5" fill="#ffffff" />
+  <circle cx="47.5" cy="67" r="1.5" fill="#ffffff" />
+
+  <!-- Right Eye -->
+  <ellipse cx="78" cy="64" rx="7.5" ry="11" fill="#0f172a" />
+  <circle cx="75.5" cy="59.5" r="3.5" fill="#ffffff" />
+  <circle cx="79.5" cy="67" r="1.5" fill="#ffffff" />
+
+  <!-- Pink Blush Cheeks -->
+  <ellipse cx="34" cy="74" rx="6" ry="3.5" fill="#f43f5e" opacity="0.45" />
+  <ellipse cx="90" cy="74" rx="6" ry="3.5" fill="#f43f5e" opacity="0.45" />
+
+  <!-- Sweet Smile -->
+  <path d="M 57 73 Q 62 79 67 73" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+</svg>

@@ -11,6 +11,7 @@ export class TargetCircle extends Phaser.GameObjects.Container {
   private graphics: Phaser.GameObjects.Graphics;
   private glowGraphics: Phaser.GameObjects.Graphics;
   private rotatingTechRing: Phaser.GameObjects.Graphics;
+  private gateSprite?: Phaser.GameObjects.Image;
   private pulseTween?: Phaser.Tweens.Tween;
   private moveTween?: Phaser.Tweens.Tween;
 
@@ -36,9 +37,16 @@ export class TargetCircle extends Phaser.GameObjects.Container {
     this.rotatingTechRing = scene.add.graphics();
     this.add(this.rotatingTechRing);
 
-    // Layer 3: Main portal body and inner vortex iris
+    // Layer 3: Main portal body (Sprite if gate texture exists, else procedural fallback)
     this.graphics = scene.add.graphics();
     this.add(this.graphics);
+
+    const gateKey = `gate_${this.config.name}`;
+    if (scene.textures.exists(gateKey)) {
+      this.gateSprite = scene.add.image(0, 0, gateKey);
+      this.gateSprite.setDisplaySize(this.currentRadius * 2.5, this.currentRadius * 2.5);
+      this.add(this.gateSprite);
+    }
 
     // Layer 4: Orbiting satellite energy particles
     this.satelliteContainer = scene.add.container(0, 0);
@@ -134,27 +142,32 @@ export class TargetCircle extends Phaser.GameObjects.Container {
       );
     }
 
-    // 3. Main portal chamber: deep energy core
-    this.graphics.fillStyle(0x020617, 0.95);
-    this.graphics.fillCircle(0, 0, r);
+    // 3. Main portal body
+    if (this.gateSprite) {
+      this.gateSprite.setDisplaySize(r * 2.5, r * 2.5);
+    } else {
+      // Procedural portal chamber fallback
+      this.graphics.fillStyle(0x020617, 0.95);
+      this.graphics.fillCircle(0, 0, r);
 
-    // 4. Concentric depth iris rings
-    this.graphics.fillStyle(c, 0.85);
-    this.graphics.fillCircle(0, 0, r - 3);
+      // Concentric depth iris rings
+      this.graphics.fillStyle(c, 0.85);
+      this.graphics.fillCircle(0, 0, r - 3);
 
-    this.graphics.lineStyle(2.5, 0xffffff, 0.9);
-    this.graphics.strokeCircle(0, 0, r - 3);
+      this.graphics.lineStyle(2.5, 0xffffff, 0.9);
+      this.graphics.strokeCircle(0, 0, r - 3);
 
-    // Inner energy glow
-    this.graphics.fillStyle(0xffffff, 0.22);
-    this.graphics.fillCircle(0, 0, r * 0.65);
+      // Inner energy glow
+      this.graphics.fillStyle(0xffffff, 0.22);
+      this.graphics.fillCircle(0, 0, r * 0.65);
 
-    this.graphics.lineStyle(1.5, 0xffffff, 0.5);
-    this.graphics.strokeCircle(0, 0, r * 0.45);
+      this.graphics.lineStyle(1.5, 0xffffff, 0.5);
+      this.graphics.strokeCircle(0, 0, r * 0.45);
 
-    // Glass dome crescent reflection
-    this.graphics.fillStyle(0xffffff, 0.35);
-    this.graphics.fillCircle(-r * 0.28, -r * 0.28, r * 0.38);
+      // Glass dome crescent reflection
+      this.graphics.fillStyle(0xffffff, 0.35);
+      this.graphics.fillCircle(-r * 0.28, -r * 0.28, r * 0.38);
+    }
 
     // Reposition orbiting satellites
     const satR = r + 16;
@@ -185,6 +198,28 @@ export class TargetCircle extends Phaser.GameObjects.Container {
       onComplete: () => shockwave.destroy()
     });
 
+    // Joyful celebration sparkles from gate
+    for (let i = 0; i < 5; i++) {
+      const sparkle = this.scene.add.text(
+        this.x + Phaser.Math.Between(-15, 15),
+        this.y + Phaser.Math.Between(-15, 15),
+        '✨',
+        { fontSize: '18px' }
+      ).setOrigin(0.5).setDepth(155);
+
+      this.scene.tweens.add({
+        targets: sparkle,
+        x: sparkle.x + Phaser.Math.Between(-30, 30),
+        y: sparkle.y - Phaser.Math.Between(25, 50),
+        alpha: 0,
+        scaleX: 1.4,
+        scaleY: 1.4,
+        duration: 520,
+        ease: 'Cubic.easeOut',
+        onComplete: () => sparkle.destroy()
+      });
+    }
+
     // Bouncy spring squash-and-stretch pop
     this.scene.tweens.add({
       targets: this,
@@ -201,6 +236,14 @@ export class TargetCircle extends Phaser.GameObjects.Container {
     const isHorizontal = this.config.side === 'top' || this.config.side === 'bottom';
     const prop = isHorizontal ? 'x' : 'y';
     const curVal = isHorizontal ? this.x : this.y;
+
+    // Red tint reaction on the cute guardian creature
+    if (this.gateSprite) {
+      this.gateSprite.setTint(0xff2255);
+      this.scene.time.delayedCall(320, () => {
+        if (this.gateSprite) this.gateSprite.clearTint();
+      });
+    }
 
     // Energetic glitch shake
     this.scene.tweens.add({

@@ -4,6 +4,7 @@ import { SmallCircle, SmallCircleConfig } from '../objects/SmallCircle';
 import { SoundManager } from '../sound/SoundManager';
 import { TutorialDialog } from './TutorialDialog';
 import { TARGET_COLORS, NON_MATCHING_COLORS, TargetSide } from '../types';
+import { preloadGameAssets } from '../assets';
 
 interface StardustParticle {
   arc: Phaser.GameObjects.Arc;
@@ -67,6 +68,10 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super('GameScene');
+  }
+
+  preload() {
+    preloadGameAssets(this);
   }
 
   create() {
@@ -619,13 +624,16 @@ export class GameScene extends Phaser.Scene {
       config = {
         color: TARGET_COLORS[chosenSide].color,
         isMatchingTarget: true,
-        targetSide: chosenSide
+        targetSide: chosenSide,
+        textureKey: `orb_${TARGET_COLORS[chosenSide].name}`
       };
     } else {
       const nonMatch = Phaser.Utils.Array.GetRandom(NON_MATCHING_COLORS);
+      const texKey = nonMatch.name === 'silver' ? 'orb_silver' : `orb_${nonMatch.name}`;
       config = {
         color: nonMatch.color,
-        isMatchingTarget: false
+        isMatchingTarget: false,
+        textureKey: texKey
       };
     }
 

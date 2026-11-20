@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="gateBlueCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#bfdbfe" />
+      <stop offset="40%" stop-color="#3b82f6" />
+      <stop offset="85%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </radialGradient>
+    <linearGradient id="hornGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Outer Corona -->
+  <circle cx="128" cy="128" r="115" fill="#3b82f6" opacity="0.18" />
+  <circle cx="128" cy="128" r="98" fill="#3b82f6" opacity="0.25" />
+
+  <!-- Cute Guardian Ears/Horns -->
+  <path d="M 68 62 C 45 30 50 10 75 25 C 85 32 88 55 82 72 Z" fill="url(#hornGrad)" stroke="#bfdbfe" stroke-width="3" />
+  <path d="M 188 62 C 211 30 206 10 181 25 C 171 32 168 55 174 72 Z" fill="url(#hornGrad)" stroke="#bfdbfe" stroke-width="3" />
+
+  <!-- Outer Techno Ring with notches -->
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#60a5fa" stroke-width="5" stroke-dasharray="16 10" />
+
+  <!-- Main Monster/Gate Body -->
+  <circle cx="128" cy="128" r="76" fill="url(#gateBlueCore)" stroke="#bfdbfe" stroke-width="4" />
+
+  <!-- Glowing Sleepy/Friendly Guardian Eyes -->
+  <ellipse cx="98" cy="100" rx="9" ry="12" fill="#0f172a" />
+  <circle cx="95" cy="95" r="4" fill="#ffffff" />
+  <circle cx="100" cy="103" r="1.8" fill="#ffffff" />
+
+  <ellipse cx="158" cy="100" rx="9" ry="12" fill="#0f172a" />
+  <circle cx="155" cy="95" r="4" fill="#ffffff" />
+  <circle cx="160" cy="103" r="1.8" fill="#ffffff" />
+
+  <!-- Rosy Blush -->
+  <ellipse cx="80" cy="112" rx="8" ry="4.5" fill="#f43f5e" opacity="0.45" />
+  <ellipse cx="176" cy="112" rx="8" ry="4.5" fill="#f43f5e" opacity="0.45" />
+
+  <!-- Open Hungry/Happy Vortex Mouth -->
+  <path d="M 108 128 Q 128 152 148 128 Z" fill="#0f172a" stroke="#bfdbfe" stroke-width="2" />
+  <path d="M 116 128 Q 128 142 140 128" fill="#3b82f6" opacity="0.8" />
+  <!-- Cute little fang teeth -->
+  <polygon points="115,128 119,134 123,128" fill="#ffffff" />
+  <polygon points="133,128 137,134 141,128" fill="#ffffff" />
+</svg>

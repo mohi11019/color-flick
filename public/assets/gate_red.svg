@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="gateRedCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fee2e2" />
+      <stop offset="40%" stop-color="#ef4444" />
+      <stop offset="85%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#450a0a" />
+    </radialGradient>
+    <linearGradient id="fireHornGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fca5a5" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Outer Corona -->
+  <circle cx="128" cy="128" r="115" fill="#ef4444" opacity="0.18" />
+  <circle cx="128" cy="128" r="98" fill="#ef4444" opacity="0.25" />
+
+  <!-- Cute Dragon Horns / Flame Tufts -->
+  <path d="M 64 68 C 38 42 42 12 68 28 C 80 35 84 56 78 74 Z" fill="url(#fireHornGrad)" stroke="#fecaca" stroke-width="3" />
+  <path d="M 192 68 C 218 42 214 12 188 28 C 176 35 172 56 178 74 Z" fill="url(#fireHornGrad)" stroke="#fecaca" stroke-width="3" />
+  <!-- Center tiny flame tuft -->
+  <path d="M 128 36 C 122 48 118 56 128 62 C 138 56 134 48 128 36 Z" fill="#fde047" stroke="#ef4444" stroke-width="2" />
+
+  <!-- Outer Techno Ring with notches -->
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#f87171" stroke-width="5" stroke-dasharray="16 10" />
+
+  <!-- Main Dragon Guardian Body -->
+  <circle cx="128" cy="128" r="76" fill="url(#gateRedCore)" stroke="#fecaca" stroke-width="4" />
+
+  <!-- Energetic Cheerful Dragon Eyes -->
+  <ellipse cx="98" cy="100" rx="9" ry="12" fill="#450a0a" />
+  <circle cx="95" cy="95" r="4" fill="#ffffff" />
+  <circle cx="100" cy="103" r="1.8" fill="#ffffff" />
+
+  <ellipse cx="158" cy="100" rx="9" ry="12" fill="#450a0a" />
+  <circle cx="155" cy="95" r="4" fill="#ffffff" />
+  <circle cx="160" cy="103" r="1.8" fill="#ffffff" />
+
+  <!-- Rosy Blush -->
+  <ellipse cx="78" cy="112" rx="8" ry="4.5" fill="#fca5a5" opacity="0.6" />
+  <ellipse cx="178" cy="112" rx="8" ry="4.5" fill="#fca5a5" opacity="0.6" />
+
+  <!-- Open Hungry Dragon Mouth with little fangs -->
+  <path d="M 106 126 Q 128 155 150 126 Z" fill="#2d0505" stroke="#fecaca" stroke-width="2" />
+  <path d="M 114 126 Q 128 144 142 126" fill="#ef4444" opacity="0.85" />
+  <!-- Top tiny fangs -->
+  <polygon points="113,126 117,133 121,126" fill="#ffffff" />
+  <polygon points="135,126 139,133 143,126" fill="#ffffff" />
+  <!-- Bottom center cute tooth -->
+  <polygon points="125,148 128,142 131,148" fill="#ffffff" />
+</svg>
