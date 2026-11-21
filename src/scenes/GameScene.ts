@@ -3,7 +3,7 @@ import { TargetCircle } from '../objects/TargetCircle';
 import { SmallCircle, SmallCircleConfig } from '../objects/SmallCircle';
 import { SoundManager } from '../sound/SoundManager';
 import { TutorialDialog } from './TutorialDialog';
-import { TARGET_COLORS, NON_MATCHING_COLORS, TargetSide } from '../types';
+import { TARGET_COLORS, TargetSide } from '../types';
 import { preloadGameAssets } from '../assets';
 
 interface StardustParticle {
@@ -36,7 +36,6 @@ export class GameScene extends Phaser.Scene {
 
   // Visual Atmosphere & Spawner
   private stardustParticles: StardustParticle[] = [];
-  private exitBaysContainer!: Phaser.GameObjects.Container;
   private centerPortalContainer!: Phaser.GameObjects.Container;
   private centerOuterRing!: Phaser.GameObjects.Graphics;
   private centerInnerRing!: Phaser.GameObjects.Graphics;
@@ -85,9 +84,6 @@ export class GameScene extends Phaser.Scene {
 
     // Background decoration & floating stardust
     this.createBackground(width, height);
-
-    // Visual Exit Zones along borders and in corners
-    this.createExitZones(width, height);
 
     // Center Spawner Portal
     this.createCenterPortal(width / 2, height / 2);
@@ -144,102 +140,6 @@ export class GameScene extends Phaser.Scene {
         speed: Phaser.Math.FloatBetween(8, 22)
       });
     }
-  }
-
-  // Visual Exit Zones (دریچه‌های خروج نئونی در گوشه‌ها و لبه‌های آزاد)
-  private createExitZones(width: number, height: number) {
-    this.exitBaysContainer = this.add.container(0, 0).setDepth(20);
-
-    const cornerSize = 82;
-    const corners = [
-      { x: 0, y: 0, label: '⇖ خروج', originX: 0, originY: 0, textX: 18, textY: 18 },
-      { x: width, y: 0, label: 'خروج ⇗', originX: 1, originY: 0, textX: width - 18, textY: 18 },
-      { x: 0, y: height, label: '⇙ خروج', originX: 0, originY: 1, textX: 18, textY: height - 18 },
-      { x: width, y: height, label: 'خروج ⇘', originX: 1, originY: 1, textX: width - 18, textY: height - 18 }
-    ];
-
-    corners.forEach(c => {
-      const wedge = this.add.graphics();
-      // Shaded corner disposal bay
-      wedge.fillStyle(0x06b6d4, 0.16);
-      wedge.beginPath();
-      if (c.originX === 0 && c.originY === 0) {
-        wedge.moveTo(0, 0);
-        wedge.lineTo(cornerSize, 0);
-        wedge.lineTo(0, cornerSize);
-      } else if (c.originX === 1 && c.originY === 0) {
-        wedge.moveTo(width, 0);
-        wedge.lineTo(width - cornerSize, 0);
-        wedge.lineTo(width, cornerSize);
-      } else if (c.originX === 0 && c.originY === 1) {
-        wedge.moveTo(0, height);
-        wedge.lineTo(cornerSize, height);
-        wedge.lineTo(0, height - cornerSize);
-      } else {
-        wedge.moveTo(width, height);
-        wedge.lineTo(width - cornerSize, height);
-        wedge.lineTo(width, height - cornerSize);
-      }
-      wedge.closePath();
-      wedge.fillPath();
-
-      // Glowing diagonal border
-      wedge.lineStyle(2.5, 0x22d3ee, 0.75);
-      wedge.strokePath();
-
-      // Inner chevron bracket
-      wedge.lineStyle(1.5, 0x38bdf8, 0.4);
-      if (c.originX === 0 && c.originY === 0) {
-        wedge.lineBetween(14, 14, 38, 14);
-        wedge.lineBetween(14, 14, 14, 38);
-      } else if (c.originX === 1 && c.originY === 0) {
-        wedge.lineBetween(width - 14, 14, width - 38, 14);
-        wedge.lineBetween(width - 14, 14, width - 14, 38);
-      } else if (c.originX === 0 && c.originY === 1) {
-        wedge.lineBetween(14, height - 14, 38, height - 14);
-        wedge.lineBetween(14, height - 14, 14, height - 38);
-      } else {
-        wedge.lineBetween(width - 14, height - 14, width - 38, height - 14);
-        wedge.lineBetween(width - 14, height - 14, width - 14, height - 38);
-      }
-
-      // Corner label
-      const label = this.add.text(c.textX, c.textY, c.label, {
-        fontSize: '13px',
-        color: '#22d3ee',
-        fontStyle: 'bold',
-        fontFamily: 'Segoe UI, Tahoma, sans-serif'
-      }).setOrigin(c.originX, c.originY);
-
-      this.exitBaysContainer.add([wedge, label]);
-    });
-
-    // Dashed border intake markers along edges
-    const edgeMarkers = [
-      { x1: 95, y1: 4, x2: 330, y2: 4 },
-      { x1: 570, y1: 4, x2: 805, y2: 4 },
-      { x1: 95, y1: height - 4, x2: 330, y2: height - 4 },
-      { x1: 570, y1: height - 4, x2: 805, y2: height - 4 },
-      { x1: 4, y1: 95, x2: 4, y2: 235 },
-      { x1: 4, y1: 465, x2: 4, y2: 605 },
-      { x1: width - 4, y1: 95, x2: width - 4, y2: 235 },
-      { x1: width - 4, y1: 465, x2: width - 4, y2: 605 }
-    ];
-
-    const markersGfx = this.add.graphics();
-    markersGfx.lineStyle(3, 0x06b6d4, 0.45);
-    edgeMarkers.forEach(m => markersGfx.lineBetween(m.x1, m.y1, m.x2, m.y2));
-    this.exitBaysContainer.add(markersGfx);
-
-    // Subtle energetic pulse on exit bays
-    this.tweens.add({
-      targets: this.exitBaysContainer,
-      alpha: 0.8,
-      duration: 1600,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut'
-    });
   }
 
   // Futuristic Center Spawner Portal with multi-layered rotation
@@ -614,28 +514,15 @@ export class GameScene extends Phaser.Scene {
       ease: 'Power2'
     });
 
-    // 65% chance matching one of 4 targets, 35% chance non-matching
-    const isMatching = Math.random() < 0.65;
-    let config: SmallCircleConfig;
-
-    if (isMatching) {
-      const sides: TargetSide[] = ['top', 'bottom', 'left', 'right'];
-      const chosenSide = Phaser.Utils.Array.GetRandom(sides) as TargetSide;
-      config = {
-        color: TARGET_COLORS[chosenSide].color,
-        isMatchingTarget: true,
-        targetSide: chosenSide,
-        textureKey: `orb_${TARGET_COLORS[chosenSide].name}`
-      };
-    } else {
-      const nonMatch = Phaser.Utils.Array.GetRandom(NON_MATCHING_COLORS);
-      const texKey = nonMatch.name === 'silver' ? 'orb_silver' : `orb_${nonMatch.name}`;
-      config = {
-        color: nonMatch.color,
-        isMatchingTarget: false,
-        textureKey: texKey
-      };
-    }
+    // 100% of spawns are the 4 target colors (Blue, Red, Green, Yellow)
+    const sides: TargetSide[] = ['top', 'bottom', 'left', 'right'];
+    const chosenSide = Phaser.Utils.Array.GetRandom(sides) as TargetSide;
+    const config: SmallCircleConfig = {
+      color: TARGET_COLORS[chosenSide].color,
+      isMatchingTarget: true,
+      targetSide: chosenSide,
+      textureKey: `orb_${TARGET_COLORS[chosenSide].name}`
+    };
 
     const circle = new SmallCircle(this, cx, cy, config);
     this.smallCircles.push(circle);
@@ -752,23 +639,6 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private isInsideExitZone(x: number, y: number): boolean {
-    const { width, height } = this.scale;
-    const margin = 42;
-
-    const isNearBorder = x <= margin || x >= width - margin || y <= margin || y >= height - margin;
-    if (!isNearBorder) return false;
-
-    for (const target of this.targetCircles.values()) {
-      const dist = Phaser.Math.Distance.Between(x, y, target.x, target.y);
-      if (dist <= target.getRadius() + 20) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   private processSmallCircles(delta: number) {
     const { width, height } = this.scale;
     const boundaryBuffer = 15;
@@ -805,14 +675,7 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
 
-      // 2. Check collision with Exit Zones
-      if (this.isInsideExitZone(circle.x, circle.y)) {
-        this.handleExitZone(circle);
-        this.smallCircles.splice(i, 1);
-        continue;
-      }
-
-      // 3. Fallback: if circle completely exited past canvas boundary
+      // 2. Check if circle completely escaped past canvas boundary without being sorted
       const isOutsideCanvas =
         circle.x < -boundaryBuffer ||
         circle.x > width + boundaryBuffer ||
@@ -820,7 +683,18 @@ export class GameScene extends Phaser.Scene {
         circle.y > height + boundaryBuffer;
 
       if (isOutsideCanvas) {
-        this.handleExitZone(circle);
+        if (this.draggedCircle === circle) {
+          this.draggedCircle = null;
+        }
+        this.comboCount = 0;
+        this.comboTimer = 0;
+        this.showMistakeAt(
+          Phaser.Math.Clamp(circle.x, 30, width - 30),
+          Phaser.Math.Clamp(circle.y, 30, height - 30),
+          undefined,
+          'گوی از صفحه خارج شد!'
+        );
+        circle.destroy();
         this.smallCircles.splice(i, 1);
       }
     }
@@ -854,44 +728,6 @@ export class GameScene extends Phaser.Scene {
       this.comboTimer = 0;
       this.showMistakeAt(circle.x, circle.y, target, 'برخورد اشتباه با دروازه!');
       circle.destroy();
-    }
-  }
-
-  private handleExitZone(circle: SmallCircle) {
-    if (circle.isDead) return;
-    circle.isDead = true;
-
-    if (this.draggedCircle === circle) {
-      this.draggedCircle = null;
-    }
-
-    // Elongated suction vortex effect
-    this.tweens.add({
-      targets: circle,
-      scaleX: 0.2,
-      scaleY: 1.6,
-      alpha: 0.1,
-      duration: 180,
-      ease: 'Cubic.easeIn',
-      onComplete: () => circle.destroy()
-    });
-
-    if (!circle.config.isMatchingTarget) {
-      // NON-MATCHING EXITED SAFELY -> SUCCESS!
-      this.soundManager.playDiscard();
-      this.addScore(50);
-      this.showFloatingText(
-        Phaser.Math.Clamp(circle.x, 80, this.scale.width - 80),
-        Phaser.Math.Clamp(circle.y, 80, this.scale.height - 80),
-        '+50 🚀 خروج موفق',
-        '#38bdf8'
-      );
-      this.createColorBurst(circle.x, circle.y, 0x06b6d4, 14);
-    } else {
-      // MATCHING CIRCLE ESCAPED INTO EXIT ZONE -> PENALTY!
-      this.comboCount = 0;
-      this.comboTimer = 0;
-      this.showMistakeAt(circle.x, circle.y, undefined, 'دایره همرنگ وارد خروجی شد!');
     }
   }
 

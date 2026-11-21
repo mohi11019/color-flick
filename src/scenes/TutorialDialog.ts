@@ -212,10 +212,10 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
 
     // Drifting small balls with motion dashed arrows
     const drifting = [
-      { x: -70, y: -40, color: 0x1e90ff, label: 'همرنگ' },
-      { x: 80, y: -30, color: 0xa55eea, label: 'غریبه/متفرقه' },
-      { x: -80, y: 40, color: 0x2ed573, label: 'همرنگ' },
-      { x: 90, y: 45, color: 0xffa502, label: 'همرنگ' }
+      { x: -70, y: -40, color: 0x1e90ff, label: 'آبی 🔵' },
+      { x: 80, y: -30, color: 0xff4757, label: 'قرمز 🔴' },
+      { x: -80, y: 40, color: 0x2ed573, label: 'سبز 🟢' },
+      { x: 90, y: 45, color: 0xffa502, label: 'زرد 🟡' }
     ];
 
     drifting.forEach(d => {
@@ -237,7 +237,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     this.contentContainer.add(illustration);
 
     // Text description below
-    const titleText = s.add.text(0, 75, '۱. متولد شدن دایره‌ها و حرکت آهسته در صفحه', {
+    const titleText = s.add.text(0, 75, '۱. متولد شدن گوی‌ها در مرکز صفحه', {
       fontSize: '20px',
       color: '#f8fafc',
       fontStyle: 'bold',
@@ -247,7 +247,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     const descText = s.add.text(
       0,
       128,
-      '• توپ‌ها از مرکز متولد شده و بلافاصله به آرامی در جهت‌های مختلف شروع به حرکت می‌کنند.\n• در چهار طرف صفحه، ۴ دروازه اصلی دارید: آبی (بالا)، قرمز (پایین)، سبز (چپ)، زرد (راست).\n• توپ‌ها یا همرنگ یکی از این ۴ دروازه هستند یا رنگی متفرقه (بنفش، سفید و...) دارند.',
+      '• گوی‌ها از مرکز متولد شده و بلافاصله به آرامی در جهت‌های مختلف شروع به حرکت می‌کنند.\n• در چهار طرف صفحه، ۴ دروازه اصلی دارید: آبی (بالا)، قرمز (پایین)، سبز (چپ)، زرد (راست).\n• هر گوی متعلق به یکی از این ۴ دروازه نگهبان است.',
       {
         fontSize: '14px',
         color: '#cbd5e1',
@@ -273,7 +273,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     const target = s.add.circle(0, -50, 32, 0x1e90ff, 0.95);
     target.setStrokeStyle(3, 0xffffff, 0.9);
     const targetGlow = s.add.circle(0, -50, 44, 0x1e90ff, 0.3);
-    const plusScore = s.add.text(65, -50, '+100 ✨\n(بزرگ‌تر شدن!)', {
+    const plusScore = s.add.text(65, -50, '+100 ✨\n(جذب موفق!)', {
       fontSize: '13px',
       color: '#2ecc71',
       fontStyle: 'bold',
@@ -307,7 +307,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     const warnText = s.add.text(
       -200,
       0,
-      '⚠️ اخطار:\nاگر توپ همرنگ از\nصفحه خارج شود:\n-۱ جون کم می‌شود! 💔',
+      '⚠️ اخطار:\nاگر گوی از صفحه\nخارج شود:\n-۱ جون کم می‌شود! 💔',
       {
         fontSize: '12px',
         color: '#fca5a5',
@@ -321,7 +321,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     this.contentContainer.add(illustration);
 
     // Text description below
-    const titleText = s.add.text(0, 75, '۲. هدایت توپ‌های همرنگ به دروازه مقصد', {
+    const titleText = s.add.text(0, 75, '۲. هدایت گوی‌ها به دروازه هم‌رنگ', {
       fontSize: '20px',
       color: '#38bdf8',
       fontStyle: 'bold',
@@ -331,7 +331,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     const descText = s.add.text(
       0,
       128,
-      '• توپ همرنگ را با موس بگیرید و مستقیماً روی دروازه هم‌رنگش بکشید.\n• به محض برخورد، دایره مقصد بزرگ‌تر شده و ۱۰۰+ امتیاز می‌گیرید!\n• اگر توپ را رها کنید، همان‌جا می‌ماند (هیچ شتاب ناخواسته‌ای به آن اعمال نمی‌شود).\n• حواستان باشد: نگذارید توپ همرنگ فرار کند و از صفحه بیرون برود!',
+      '• گوی را با موس یا لمس بگیرید و به سمت دروازه هم‌رنگش پرتاب کنید.\n• به محض برخورد، دروازه نگهبان با جرقه‌های ستاره‌ای جشن گرفته و ۱۰۰+ امتیاز می‌گیرید!\n• اگر گوی را در میانه مسیر رها کنید، همان‌جا می‌ماند (بدون شتاب ناخواسته).\n• حواستان باشد: نگذارید هیچ گویی فرار کند و از صفحه بیرون برود!',
       {
         fontSize: '14px',
         color: '#cbd5e1',
@@ -344,7 +344,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     this.contentContainer.add([titleText, descText]);
   }
 
-  // Slide 3: بیرون انداختن رنگ‌های متفرقه
+  // Slide 3: سیستم کومبو و پرهیز از خطا
   private renderSlide3() {
     const s = this.scene;
     const illustration = s.add.container(0, -60);
@@ -353,64 +353,63 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     illBg.setStrokeStyle(1, 0x1e293b);
     illustration.add(illBg);
 
-    // Screen edge boundary line
-    const border = s.add.graphics();
-    border.lineStyle(2, 0xe2e8f0, 0.4);
-    border.lineBetween(-20, -90, -20, 90);
-    const borderLabel = s.add.text(-25, -75, 'لبه صفحه', {
-      fontSize: '11px',
-      color: '#94a3b8',
-      fontFamily: 'Segoe UI, Tahoma, sans-serif'
-    }).setOrigin(1, 0.5);
+    // Combo Badges illustration
+    const comboBadge1 = s.add.text(-170, -35, '⚡ کومبو ۲x!', {
+      fontSize: '18px',
+      color: '#f59e0b',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
 
-    // Outside label
-    const outsideLabel = s.add.text(-120, 0, 'بیرون از صفحه\n✅ +۵۰ امتیاز پاکسازی', {
+    const comboBadge2 = s.add.text(-170, 5, '🌟 سوپر کومبو ۳x!', {
+      fontSize: '20px',
+      color: '#eab308',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    const comboBadge3 = s.add.text(-170, 45, '👑 الترا کومبو ۵x!', {
+      fontSize: '22px',
+      color: '#ec4899',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    illustration.add([comboBadge1, comboBadge2, comboBadge3]);
+
+    // Danger / Mistake explanation box
+    const mistakeBox = s.add.rectangle(130, 0, 260, 140, 0x450a0a, 0.85);
+    mistakeBox.setStrokeStyle(1.5, 0xef4444);
+
+    const mistakeTitle = s.add.text(130, -45, '❌ چه چیزهایی خطا محسوب می‌شوند؟', {
       fontSize: '13px',
-      color: '#38bdf8',
-      align: 'center',
+      color: '#fca5a5',
       fontStyle: 'bold',
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
     }).setOrigin(0.5);
 
-    // Purple non-matching ball being dragged outside
-    const purpleBall = s.add.circle(60, 0, 16, 0xa55eea, 1);
-    purpleBall.setStrokeStyle(2, 0xffffff, 1);
-
-    const dragArrow = s.add.graphics();
-    dragArrow.lineStyle(2, 0x22c55e, 0.85);
-    dragArrow.lineBetween(50, 0, -40, 0);
-    dragArrow.lineBetween(-40, 0, -30, -7);
-    dragArrow.lineBetween(-40, 0, -30, 7);
-
-    const cursor = s.add.text(60, 26, '🖱️ بیرون بکشید', {
+    const mistake1 = s.add.text(130, -12, '۱. برخورد به دروازه اشتباه (-۱ ❤️)', {
       fontSize: '12px',
-      color: '#cbd5e1',
+      color: '#fecaca',
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
     }).setOrigin(0.5);
 
-    // Hazard warning box: hitting a target
-    const hazardBox = s.add.rectangle(190, 0, 185, 95, 0x450a0a, 0.85);
-    hazardBox.setStrokeStyle(1, 0xef4444);
-    const hazardText = s.add.text(
-      190,
-      0,
-      '❌ خطر برخورد:\nاگر توپ غیرهمرنگ به هر\nدروازه‌ای برخورد کند:\n-۱ جون کم می‌شود! 💔',
-      {
-        fontSize: '12px',
-        color: '#fca5a5',
-        align: 'center',
-        lineSpacing: 4,
-        fontFamily: 'Segoe UI, Tahoma, sans-serif'
-      }
-    ).setOrigin(0.5);
+    const mistake2 = s.add.text(130, 16, '۲. فرار کردن گوی از لبه‌های صفحه (-۱ ❤️)', {
+      fontSize: '12px',
+      color: '#fecaca',
+      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+    }).setOrigin(0.5);
 
-    illustration.add([border, borderLabel, outsideLabel, dragArrow, purpleBall, cursor, hazardBox, hazardText]);
+    const mistake3 = s.add.text(130, 44, '⚡ در هر خطا کومبو صفر می‌شود!', {
+      fontSize: '11px',
+      color: '#fbbf24',
+      fontFamily: 'Segoe UI, Tahoma, sans-serif'
+    }).setOrigin(0.5);
+
+    illustration.add([mistakeBox, mistakeTitle, mistake1, mistake2, mistake3]);
     this.contentContainer.add(illustration);
 
     // Text description below
-    const titleText = s.add.text(0, 75, '۳. دریچه‌های خروج در اطراف صفحه (دفع رنگ‌های متفرقه)', {
+    const titleText = s.add.text(0, 75, '۳. ساخت زنجیره کومبو و مراقبت از جان‌ها', {
       fontSize: '20px',
-      color: '#22d3ee',
+      color: '#f59e0b',
       fontStyle: 'bold',
       fontFamily: 'Segoe UI, Tahoma, sans-serif'
     }).setOrigin(0.5);
@@ -418,7 +417,7 @@ export class TutorialDialog extends Phaser.GameObjects.Container {
     const descText = s.add.text(
       0,
       128,
-      '• در گوشه‌ها و لبه‌های صفحه (جایی که دروازه‌ها نیستند) دریچه‌های خروج نئونی تعبیه شده‌اند.\n• توپ‌های متفرقه (بنفش، سفید و...) را با موس به سمت این دریچه‌های خروج ببرید تا خارج شوند (+۵۰ امتیاز).\n• اگر توپی به آرامی حرکت کرده و به این دریچه‌ها برسد نیز خودبه‌خود از صفحه خارج می‌شود.\n• هرگز نگذارید توپ‌های متفرقه به دروازه‌های ۴ طرف بخورند، چون ۱ جون کم خواهد شد!',
+      '• با پرتاب‌های پیاپی و سریع به دروازه‌های درست، ضریب کومبو فعال می‌شود (+۲۰۰، +۳۰۰، +۵۰۰ امتیاز!).\n• شما ۵ جان (❤️) دارید؛ اگر گویی از صفحه بیرون بیفتد یا به دروازه اشتباه برخورد کند ۱ جان کم می‌شود.\n• فقط کافی است روی هدایت سریع ۴ رنگ اصلی تمرکز کنید و نگذارید گویی فرار کند!',
       {
         fontSize: '14px',
         color: '#cbd5e1',

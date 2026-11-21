@@ -180,8 +180,7 @@ export class TargetCircle extends Phaser.GameObjects.Container {
 
   // Called when a matching circle is absorbed
   public grow() {
-    this.currentRadius = Math.min(this.maxRadius, this.currentRadius + this.growthPerMatch);
-    this.redraw();
+    // Fixed size: target circle does not grow permanently anymore
 
     // Shockwave donut ring expanding from portal
     const shockwave = this.scene.add.circle(this.x, this.y, this.getRadius() * 0.8);
